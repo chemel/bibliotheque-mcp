@@ -1,0 +1,10 @@
+mcp:
+  servers:
+      default:
+          name: 'my-bibliotheque'
+          transports:
+              stdio: true
+              http: true
+          http:
+              path: /mcp
+          registry: '*'         # expose every registered capability
