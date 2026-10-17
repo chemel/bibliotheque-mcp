@@ -16,28 +16,25 @@ class BookRepository extends ServiceEntityRepository
         parent::__construct($registry, Book::class);
     }
 
-//    /**
-//     * @return Book[] Returns an array of Book objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('b')
-//            ->andWhere('b.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('b.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return Book[]
+     */
+    public function searchByTitleOrAuthor(string $query): array
+    {
+        $query = trim($query);
 
-//    public function findOneBySomeField($value): ?Book
-//    {
-//        return $this->createQueryBuilder('b')
-//            ->andWhere('b.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ('' === $query) {
+            return [];
+        }
+
+        $escapedQuery = strtr($query, ['!' => '!!', '%' => '!%', '_' => '!_']);
+        $pattern = '%'.$escapedQuery.'%';
+
+        return $this->createQueryBuilder('book')
+            ->andWhere("(LOWER(book.title) LIKE LOWER(:query) ESCAPE '!' OR LOWER(book.author) LIKE LOWER(:query) ESCAPE '!')")
+            ->setParameter('query', $pattern)
+            ->orderBy('book.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
